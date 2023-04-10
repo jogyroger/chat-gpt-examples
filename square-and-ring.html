@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Rotating Square Frame and Ring</title>
+    <style>
+      body {
+        margin: 0;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+      // Set up the scene, camera, and renderer
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      // Create a metallic material for the ring and the frame
+      const material = new THREE.MeshStandardMaterial({
+        color: 0xaaaaaa,
+        metalness: 0.9,
+        roughness: 0.2,
+      });
+
+      // Create a square frame by subtracting a smaller square from a larger square and extruding the shape
+      const outerSquare = new THREE.Shape().moveTo(-30, -30).lineTo(30, -30).lineTo(30, 30).lineTo(-30, 30).lineTo(-30, -30);
+      const innerSquare = new THREE.Shape().moveTo(-27, -27).lineTo(27, -27).lineTo(27, 27).lineTo(-27, 27).lineTo(-27, -27);
+      outerSquare.holes.push(innerSquare);
+      const frameGeometry = new THREE.ExtrudeGeometry(outerSquare, { amount: 5, bevelEnabled: false });
+      const frame = new THREE.Mesh(frameGeometry, material);
+      scene.add(frame);
+
+      // Create a ring
+      //const ringGeometry = new THREE.TorusGeometry(27, 2.5, 16, 100);
+      //const ring = new THREE.Mesh(ringGeometry, material);
+      //scene.add(ring);
+
+      // Create a smaller ring
+      const ringGeometry = new THREE.TorusGeometry(20.3, 2.25, 16, 100); // Ring size adjusted to 0.9 times smaller
+      const ring = new THREE.Mesh(ringGeometry, material);
+      scene.add(ring);
+      
+      // Add two light sources
+      const light1 = new THREE.PointLight(0xffffff, 2, 100);
+      light1.position.set(5, 10, 10);
+      scene.add(light1);
+
+      const light2 = new THREE.PointLight(0xffffff, 2, 100);
+      light2.position.set(-10, -10, 10);
+      scene.add(light2);
+
+      // Position camera
+      camera.position.z = 100;
+
+      // Animation loop
+      const animate = function () {
+        requestAnimationFrame(animate);
+
+        // Rotate the square frame horizontally
+        frame.rotation.y += 0.01;
+
+        // Rotate the ring vertically
+        ring.rotation.x += 0.02;
+
+        renderer.render(scene, camera);
+      };
+
+      animate();
+
+      // Handle window resizing
+      window.addEventListener("resize", function () {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        renderer.setSize(width, height);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+      });
+    </script>
+  </body>
+</html>
